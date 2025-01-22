@@ -60,7 +60,6 @@ export default function CryptographyTool() {
     formData.append("algorithm", algorithm);
     formData.append("input", input);
   
-    // Include algorithm-specific data
     if (algorithm === "Caesar Cipher") {
       formData.append("shift", shift);
       formData.append("direction", direction);
@@ -70,31 +69,32 @@ export default function CryptographyTool() {
     } else if (algorithm === "Vigenère Cipher") {
       formData.append("key", key);
     } else if (algorithm === "RSA") {
-      if (operation === "encryption") {
-        if (rsaKeyOption === "existing") {
-          formData.append("rsaPublicKeyFile", rsaPublicKeyFile);
-        }
+      if (operation === "encryption" && rsaKeyOption === "existing") {
+        formData.append("rsaPublicKeyFile", rsaPublicKeyFile);
       } else if (operation === "decryption") {
         formData.append("rsaInputFile", rsaInputFile);
         formData.append("rsaPrivateKeyFile", rsaPrivateKeyFile);
       }
     } else if (algorithm === "AES") {
-      if (operation === "encryption") {
-        if (aesKeyOption === "existing") {
-          formData.append("aesKeyFile", aesKeyFile);
-        }
+      if (operation === "encryption" && aesKeyOption === "existing") {
+        formData.append("aesKeyFile", aesKeyFile);
       } else if (operation === "decryption") {
         formData.append("aesInputFile", aesInputFile);
         formData.append("aesKeyFile", aesKeyFile);
       }
     }
   
+    // Debug: Log FormData contents
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+  
     try {
-      console.log(formData)
       const response = await fetch("http://127.0.0.1:5000", {
         method: "POST",
         body: formData,
       });
+  
       const data = await response.json();
       setResult(data.result);
       setStep(4);
@@ -104,6 +104,7 @@ export default function CryptographyTool() {
       setStep(4);
     }
   };
+  
   
   
   const renderAlgorithmFields = () => {
