@@ -55,55 +55,59 @@ export default function CryptographyTool() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const formData = new FormData();
-    formData.append("operation", operation);
-    formData.append("algorithm", algorithm);
-    formData.append("input", input);
+    const payload = {
+      operation,
+      algorithm,
+      input,
+      ...(algorithm === "Caesar Cipher" && {
+        shift,
+        direction,
+        ...(operation === "decryption" && { decryptionMethod }),
+      }),
+      ...(algorithm === "Vigenère Cipher" && { key }),
+      ...(algorithm === "RSA" && {
+        ...(operation === "encryption" && rsaKeyOption === "existing" && {
+          rsaPublicKeyFile: rsaPublicKeyFile ? rsaPublicKeyFile.name : null,
+        }),
+        ...(operation === "decryption" && {
+          rsaInputFile: rsaInputFile ? rsaInputFile.name : null,
+          rsaPrivateKeyFile: rsaPrivateKeyFile ? rsaPrivateKeyFile.name : null,
+        }),
+      }),
+      ...(algorithm === "AES" && {
+        ...(operation === "encryption" && aesKeyOption === "existing" && {
+          aesKeyFile: aesKeyFile ? aesKeyFile.name : null,
+        }),
+        ...(operation === "decryption" && {
+          aesInputFile: aesInputFile ? aesInputFile.name : null,
+          aesKeyFile: aesKeyFile ? aesKeyFile.name : null,
+        }),
+      }),
+    };
   
-    if (algorithm === "Caesar Cipher") {
-      formData.append("shift", shift);
-      formData.append("direction", direction);
-      if (operation === "decryption") {
-        formData.append("decryptionMethod", decryptionMethod);
-      }
-    } else if (algorithm === "Vigenère Cipher") {
-      formData.append("key", key);
-    } else if (algorithm === "RSA") {
-      if (operation === "encryption" && rsaKeyOption === "existing") {
-        formData.append("rsaPublicKeyFile", rsaPublicKeyFile);
-      } else if (operation === "decryption") {
-        formData.append("rsaInputFile", rsaInputFile);
-        formData.append("rsaPrivateKeyFile", rsaPrivateKeyFile);
-      }
-    } else if (algorithm === "AES") {
-      if (operation === "encryption" && aesKeyOption === "existing") {
-        formData.append("aesKeyFile", aesKeyFile);
-      } else if (operation === "decryption") {
-        formData.append("aesInputFile", aesInputFile);
-        formData.append("aesKeyFile", aesKeyFile);
-      }
-    }
-  
-    // Debug: Log FormData contents
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
+    // console.log("Payload:", payload);
   
     try {
-      const response = await fetch("http://127.0.0.1:5000", {
+      const response = await fetch("http://127.0.0.1:5000/crypto", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
   
       const data = await response.json();
-      setResult(data.result);
+      if (response.ok) {
+        setResult(data.result);
+      } else {
+        console.error("Error:", data.error);
+        setResult("An error occurred");
+      }
       setStep(4);
     } catch (error) {
       console.error("Error:", error);
       setResult("An error occurred");
       setStep(4);
     }
-  };
+  };  
   
   
   

@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/crypto": {"origins": "http://localhost:5173"}})
 
 from Crypto.Cipher import DES 
 from Crypto.Cipher import AES
@@ -18,6 +18,7 @@ import os
 def base64Encrypt(s):
     baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     binary = ''.join(format(ord(char), '08b') for char in s)
+    cipher = ''
 
     while len(binary) % 6 != 0:
         binary += '0'
@@ -388,17 +389,20 @@ def rsaDecrypt():
         print(f"Error during RSA decryption: {e}")
         return None
 
-@app.route('/', methods=['POST'])
+@app.route('/crypto', methods=['POST'])
 def crypto():
-    data = request.json()
+    data = request.get_json()
+    # print(data)
     operation = data.get("operation")
     algorithm = data.get("algorithm")
     input_text = data.get("input")
     key = data.get("key")
+    result = None
     
     if operation == "encryption":
         if algorithm == "Base64":
             result = base64Encrypt(input_text)
+            # result = "Not implemented"
         # elif algorithm == "Caesar Cipher":
         #     result = caesarEncrypt(input_text)
         # elif algorithm == "Monoalphabetic Substitution Cipher":
@@ -415,7 +419,8 @@ def crypto():
             return jsonify({"error": "Unsupported encryption algorithm"}), 400
     elif operation == "decryption":
         if algorithm == "Base64":
-            result = base64Decrypt(input_text)
+            # result = base64Decrypt(input_text)
+            result = "Not implemented"
         # elif algorithm == "Caesar Cipher":
         #     result = caesarDecrypt(input_text)
         # elif algorithm == "Monoalphabetic Substitution Cipher":
@@ -442,7 +447,9 @@ def crypto():
         else:
             return jsonify({"error": "Unsupported hash algorithm"}), 400
     
+    if result is None:
+        return jsonify({"error": "An error occurred"}), 500
     return jsonify({"result": result})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
