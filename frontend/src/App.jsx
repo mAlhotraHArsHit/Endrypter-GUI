@@ -1,90 +1,90 @@
-import React, { useState } from "react"
-import "./App.css"
+import React, { useState } from "react";
+import "./App.css";
 
 const operations = [
   { id: "encryption", name: "Encryption" },
   { id: "decryption", name: "Decryption" },
   { id: "hashing", name: "Hashing" },
-]
+];
 
 const algorithms = {
   encryption: ["Base64", "Caesar Cipher", "Monoalphabetic Substitution Cipher", "Vigenère Cipher", "DES", "AES", "RSA"],
   decryption: ["Base64", "Caesar Cipher", "Monoalphabetic Substitution Cipher", "Vigenère Cipher", "DES", "AES", "RSA"],
   hashing: ["MD5", "SHA-1", "SHA-256", "SHA-512"],
-}
+};
 
 export default function CryptographyTool() {
-  const [step, setStep] = useState(1)
-  const [operation, setOperation] = useState("")
-  const [algorithm, setAlgorithm] = useState("")
-  const [input, setInput] = useState("")
-  const [key, setKey] = useState("")
-  const [result, setResult] = useState("")
-  const [shift, setShift] = useState(0)
-  const [direction, setDirection] = useState("right")
-  const [decryptionMethod, setDecryptionMethod] = useState("shift")
-  const [rsaKeyOption, setRsaKeyOption] = useState("new")
-  const [rsaPublicKeyFile, setRsaPublicKeyFile] = useState(null)
-  const [rsaPrivateKeyFile, setRsaPrivateKeyFile] = useState(null)
-  const [rsaInputFile, setRsaInputFile] = useState(null)
-  const [aesKeyOption, setAesKeyOption] = useState("new")
-  const [aesKeyFile, setAesKeyFile] = useState(null)
-  const [aesInputFile, setAesInputFile] = useState(null)
+  const [step, setStep] = useState(1);
+  const [operation, setOperation] = useState("");
+  const [algorithm, setAlgorithm] = useState("");
+  const [input, setInput] = useState("");
+  const [key, setKey] = useState("");
+  const [result, setResult] = useState("");
+  const [shift, setShift] = useState(0);
+  const [direction, setDirection] = useState("right");
+  const [decryptionMethod, setDecryptionMethod] = useState("shift");
+  const [rsaKeyOption, setRsaKeyOption] = useState("new");
+  const [rsaPublicKeyFile, setRsaPublicKeyFile] = useState(null);
+  const [rsaPrivateKeyFile, setRsaPrivateKeyFile] = useState(null);
+  const [rsaInputFile, setRsaInputFile] = useState(null);
+  const [aesKeyOption, setAesKeyOption] = useState("new");
+  const [aesKeyFile, setAesKeyFile] = useState(null);
+  const [aesInputFile, setAesInputFile] = useState(null);
 
   const handleOperationSelect = (selectedOperation) => {
-    setOperation(selectedOperation)
-  }
+    setOperation(selectedOperation);
+  };
 
   const handleAlgorithmSelect = (selectedAlgorithm) => {
-    setAlgorithm(selectedAlgorithm)
-  }
+    setAlgorithm(selectedAlgorithm);
+  };
 
   const handleNext = () => {
     if (step === 1 && operation) {
-      setStep(2)
+      setStep(2);
     } else if (step === 2 && algorithm) {
-      setStep(3)
+      setStep(3);
     }
-  }
+  };
 
   const handleBack = () => {
     if (step > 1) {
-      setStep(step - 1)
+      setStep(step - 1);
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const formData = new FormData()
-    formData.append("operation", operation)
-    formData.append("algorithm", algorithm)
-    formData.append("input", input)
-    formData.append("key", key)
-    formData.append("shift", shift)
-    formData.append("direction", direction)
-    formData.append("decryptionMethod", decryptionMethod)
-    formData.append("rsaKeyOption", rsaKeyOption)
-    formData.append("aesKeyOption", aesKeyOption)
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("operation", operation);
+    formData.append("algorithm", algorithm);
+    formData.append("input", input);
+    formData.append("key", key);
+    formData.append("shift", shift);
+    formData.append("direction", direction);
+    formData.append("decryptionMethod", decryptionMethod);
+    formData.append("rsaKeyOption", rsaKeyOption);
+    formData.append("aesKeyOption", aesKeyOption);
 
     if (algorithm === "RSA") {
       if (operation === "encryption") {
         if (rsaKeyOption === "existing") {
-          formData.append("rsaPublicKeyFile", rsaPublicKeyFile)
+          formData.append("rsaPublicKeyFile", rsaPublicKeyFile);
         }
       } else if (operation === "decryption") {
-        formData.append("rsaInputFile", rsaInputFile)
-        formData.append("rsaPrivateKeyFile", rsaPrivateKeyFile)
+        formData.append("rsaInputFile", rsaInputFile);
+        formData.append("rsaPrivateKeyFile", rsaPrivateKeyFile);
       }
     }
 
     if (algorithm === "AES") {
       if (operation === "encryption") {
         if (aesKeyOption === "existing") {
-          formData.append("aesKeyFile", aesKeyFile)
+          formData.append("aesKeyFile", aesKeyFile);
         }
       } else if (operation === "decryption") {
-        formData.append("aesInputFile", aesInputFile)
-        formData.append("aesKeyFile", aesKeyFile)
+        formData.append("aesInputFile", aesInputFile);
+        formData.append("aesKeyFile", aesKeyFile);
       }
     }
 
@@ -93,55 +93,64 @@ export default function CryptographyTool() {
       const response = await fetch("http://127.0.0.1:5000", {
         method: "POST",
         body: formData,
-      })
-      const data = await response.json()
-      setResult(data.result)
-      setStep(4)
+      });
+      const data = await response.json();
+      setResult(data.result);
+      setStep(4);
     } catch (error) {
-      console.error("Error:", error)
-      setResult("An error occurred")
-      setStep(4)
+      console.error("Error:", error);
+      setResult("An error occurred");
+      setStep(4);
     }
-  }
+  };
 
   const renderAlgorithmFields = () => {
     switch (algorithm) {
       case "Caesar Cipher":
         return (
           <>
-            <div className="input-group">
-              <label htmlFor="direction">Direction:</label>
-              <select
-                id="direction"
-                value={direction}
-                onChange={(e) => setDirection(e.target.value)}
-                className="input-text"
-                required
-              >
-                {operation === "encryption" ? (
-                  <>
-                    <option value="right">Right shift</option>
-                    <option value="left">Left shift</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="left">Left Shift</option>
-                    <option value="right">Right Shift</option>
-                  </>
-                )}
-              </select>
-            </div>
-            <div className="input-group">
-              <label htmlFor="shift">Shift:</label>
-              <input
-                type="number"
-                id="shift"
-                value={shift}
-                onChange={(e) => setShift(Number.parseInt(e.target.value))}
-                className="input-text"
-                required
-              />
-            </div>
+            {operation === "decryption" && decryptionMethod === "all" ? (
+              <>
+                <p className="note">This option will generate all possible combinations.</p>
+              </>
+            ) : (
+              <>
+                <div className="input-group">
+                  <label htmlFor="direction">Direction:</label>
+                  <select
+                    id="direction"
+                    value={direction}
+                    onChange={(e) => setDirection(e.target.value)}
+                    className="input-text"
+                    required
+                  >
+                    {operation === "encryption" ? (
+                      <>
+                        <option value="right">Right shift</option>
+                        <option value="left">Left shift</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="left">Left Shift</option>
+                        <option value="right">Right Shift</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label htmlFor="shift">Shift:</label>
+                  <input
+                    type="number"
+                    id="shift"
+                    value={shift}
+                    onChange={(e) => setShift(Number.parseInt(e.target.value))}
+                    className="input-text"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
             {operation === "decryption" && (
               <div className="input-group">
                 <label htmlFor="decryptionMethod">Decryption Method:</label>
@@ -158,7 +167,7 @@ export default function CryptographyTool() {
               </div>
             )}
           </>
-        )
+        );
       case "RSA":
         if (operation === "encryption") {
           return (
@@ -189,7 +198,7 @@ export default function CryptographyTool() {
                 </div>
               )}
             </>
-          )
+          );
         } else if (operation === "decryption") {
           return (
             <>
@@ -214,9 +223,9 @@ export default function CryptographyTool() {
                 />
               </div>
             </>
-          )
+          );
         }
-        break
+        break;
       case "AES":
         if (operation === "encryption") {
           return (
@@ -247,7 +256,7 @@ export default function CryptographyTool() {
                 </div>
               )}
             </>
-          )
+          );
         } else if (operation === "decryption") {
           return (
             <>
@@ -272,9 +281,9 @@ export default function CryptographyTool() {
                 />
               </div>
             </>
-          )
+          );
         }
-        break
+        break;
       case "Vigenère Cipher":
         return (
           <div className="input-group">
@@ -288,11 +297,11 @@ export default function CryptographyTool() {
               required
             />
           </div>
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="cryptography-tool-container">
@@ -332,18 +341,18 @@ export default function CryptographyTool() {
           <div className="step-container">
             <h2 className="step-title">Choose an algorithm:</h2>
             <div className="radio-group">
-              {algorithms[operation].map((alg) => (
-                <div key={alg} className="radio-option">
+              {algorithms[operation].map((algo) => (
+                <div key={algo} className="radio-option">
                   <input
                     type="radio"
-                    id={alg}
+                    id={algo}
                     name="algorithm"
-                    value={alg}
-                    checked={algorithm === alg}
-                    onChange={() => handleAlgorithmSelect(alg)}
+                    value={algo}
+                    checked={algorithm === algo}
+                    onChange={() => handleAlgorithmSelect(algo)}
                     className="radio-input"
                   />
-                  <label htmlFor={alg}>{alg}</label>
+                  <label htmlFor={algo}>{algo}</label>
                 </div>
               ))}
             </div>
@@ -354,54 +363,55 @@ export default function CryptographyTool() {
         )}
 
         {step === 3 && (
-          <form onSubmit={handleSubmit} className="form-container">
-            {(algorithm !== "AES" || (algorithm === "AES" && operation === "encryption")) && (
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="input">Input:</label>
               <textarea
-                placeholder={`Enter text to ${operation}`}
+                id="input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="input-textarea"
+                className="input-text"
+                rows="4"
                 required
               />
-            )}
+            </div>
             {renderAlgorithmFields()}
-            <button type="submit" className="process-button">
-              Process
+            <button type="submit" className="submit-button">
+              Submit
             </button>
           </form>
         )}
 
         {step === 4 && (
           <div className="result-container">
-            <h3 className="result-title">Result:</h3>
-            <pre className="result">{result}</pre>
+            <h2 className="result-title">Result:</h2>
+            <textarea
+              className="result-text"
+              rows="4"
+              value={result}
+              readOnly
+            />
             <button
               onClick={() => {
-                setStep(1)
-                setOperation("")
-                setAlgorithm("")
-                setInput("")
-                setKey("")
-                setResult("")
-                setShift(0)
-                setDirection("right")
-                setDecryptionMethod("shift")
-                setRsaKeyOption("new")
-                setRsaPublicKeyFile(null)
-                setRsaPrivateKeyFile(null)
-                setRsaInputFile(null)
-                setAesKeyOption("new")
-                setAesKeyFile(null)
-                setAesInputFile(null)
+                setStep(1);
+                setOperation("");
+                setAlgorithm("");
+                setInput("");
+                setKey("");
+                setResult("");
+                setShift(0);
+                setDirection("right");
+                setDecryptionMethod("shift");
+                setRsaKeyOption("new");
+                setAesKeyOption("new");
               }}
-              className="start-over-button"
+              className="reset-button"
             >
-              Start Over
+              Reset
             </button>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
-
