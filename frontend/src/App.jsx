@@ -52,21 +52,24 @@ export default function CryptographyTool() {
       setStep(step - 1);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     const formData = new FormData();
     formData.append("operation", operation);
     formData.append("algorithm", algorithm);
     formData.append("input", input);
-    formData.append("key", key);
-    formData.append("shift", shift);
-    formData.append("direction", direction);
-    formData.append("decryptionMethod", decryptionMethod);
-    formData.append("rsaKeyOption", rsaKeyOption);
-    formData.append("aesKeyOption", aesKeyOption);
-
-    if (algorithm === "RSA") {
+  
+    // Include algorithm-specific data
+    if (algorithm === "Caesar Cipher") {
+      formData.append("shift", shift);
+      formData.append("direction", direction);
+      if (operation === "decryption") {
+        formData.append("decryptionMethod", decryptionMethod);
+      }
+    } else if (algorithm === "Vigenère Cipher") {
+      formData.append("key", key);
+    } else if (algorithm === "RSA") {
       if (operation === "encryption") {
         if (rsaKeyOption === "existing") {
           formData.append("rsaPublicKeyFile", rsaPublicKeyFile);
@@ -75,9 +78,7 @@ export default function CryptographyTool() {
         formData.append("rsaInputFile", rsaInputFile);
         formData.append("rsaPrivateKeyFile", rsaPrivateKeyFile);
       }
-    }
-
-    if (algorithm === "AES") {
+    } else if (algorithm === "AES") {
       if (operation === "encryption") {
         if (aesKeyOption === "existing") {
           formData.append("aesKeyFile", aesKeyFile);
@@ -87,9 +88,9 @@ export default function CryptographyTool() {
         formData.append("aesKeyFile", aesKeyFile);
       }
     }
-
+  
     try {
-      console.log(formData);
+      console.log(formData)
       const response = await fetch("http://127.0.0.1:5000", {
         method: "POST",
         body: formData,
@@ -103,7 +104,8 @@ export default function CryptographyTool() {
       setStep(4);
     }
   };
-
+  
+  
   const renderAlgorithmFields = () => {
     switch (algorithm) {
       case "Caesar Cipher":
