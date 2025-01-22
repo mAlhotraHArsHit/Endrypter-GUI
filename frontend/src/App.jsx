@@ -89,7 +89,8 @@ export default function CryptographyTool() {
     }
 
     try {
-      const response = await fetch("/api/crypto", {
+      console.log(formData);
+      const response = await fetch("http://127.0.0.1:5000", {
         method: "POST",
         body: formData,
       })

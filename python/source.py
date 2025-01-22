@@ -1,3 +1,9 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
 from Crypto.Cipher import DES 
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes 
@@ -9,8 +15,7 @@ from tkinter.filedialog import askopenfilename
 import hashlib
 import os
 
-def base64Encrypt():
-    s = input("Enter the string: ")
+def base64Encrypt(s):
     baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     binary = ''.join(format(ord(char), '08b') for char in s)
 
@@ -142,9 +147,9 @@ def aesEncrypt():
     print("Encryption complete. Ciphertext saved to 'ciphertext_aes.txt'.")
     return "ENCRYPTION SUCCESSFUL"
 
-def rsaEncrypt():
+def rsaEncrypt(s):
 # RSA encryption
-    s = input("Enter the string: ")
+    # s = input("Enter the string: ")
 
     # Ask whether to generate a new key pair or use an existing one
     choice = input("Do you want to generate a new key pair or use an existing one? (new/existing): ").strip().lower()
@@ -189,18 +194,7 @@ def rsaEncrypt():
     print("Encryption complete. Ciphertext saved to 'ciphertext_rsa.txt'.")
     return "FILE CREATED"
     
-def encrypt():
-    print("Choose Encryption Algorithm")
-    print("(1) Base64")
-    print("(2) Caesar Cipher")
-    print("(3) Monoalphabetic Substitution Cipher")
-    print("(4) Vignere Cipher")
-    print("(5) DES")
-    print("(6) AES")
-    print("(7) RSA")
-    
-def base64Decrypt():
-    cipher = input("Enter the string: ")
+def base64Decrypt(cipher):
     cipher = cipher.rstrip('=')
     baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     binary = ''.join(format(baseChars.index(char),'06b') for char in cipher)
@@ -272,9 +266,7 @@ def caesarDecrypt():
                     deciphe += char
             print(f"Shift {shift_value}: {deciphe}")
 
-def monoDecrypt():
-    cipher = input("Enter the string: ")
-
+def MonoalphabeticDecrypt(cipher):
     key = {
     'A': 'S', 'B': 'Y', 'C': 'E', 'D': 'C', 'E': 'T', 'F': 'B', 'G': 'F',
     'H': 'A', 'I': 'G', 'J': 'H', 'K': 'W', 'L': 'I', 'M': 'N', 'N': 'R',
@@ -292,8 +284,7 @@ def monoDecrypt():
         else:
             decipher += char
 
-def vignereDecypt():
-    cipher = input("Enter the string: ")
+def vignereDecrypt(cipher):
     key = "NEITB"
     for i in range(len(cipher)):
         if cipher[i].isalpha():
@@ -308,11 +299,7 @@ def vignereDecypt():
         else:
             decipher += cipher[i]
 
-def desDecrypt():
-    cipher = input("Enter the string: ")
-    print("Enter the secret key (hex-encoded, 16 characters):")
-    key_hex = input().strip()
-
+def desDecrypt(cipher, key_hex):
     try:
         key = bytes.fromhex(key_hex) 
     except ValueError:
@@ -401,22 +388,61 @@ def rsaDecrypt():
         print(f"Error during RSA decryption: {e}")
         return None
 
-def md5Hash():
-    s = input("Enter string: ").encode()
-    result = hashlib.md5(s).hexdigest()
-    return result
+@app.route('/', methods=['POST'])
+def crypto():
+    data = request.json()
+    operation = data.get("operation")
+    algorithm = data.get("algorithm")
+    input_text = data.get("input")
+    key = data.get("key")
+    
+    if operation == "encryption":
+        if algorithm == "Base64":
+            result = base64Encrypt(input_text)
+        # elif algorithm == "Caesar Cipher":
+        #     result = caesarEncrypt(input_text)
+        # elif algorithm == "Monoalphabetic Substitution Cipher":
+        #     result = MonoalphabeticEncrypt(input_text)
+        # elif algorithm == "Vignere Cipher":
+        #     result = vignereEncrypt(input_text)
+        # elif algorithm == "DES":
+        #     result = desEncrypt(input_text)
+        # elif algorithm == "AES":
+        #     result = aesEncrypt(input_text)
+        # elif algorithm == "RSA":
+        #     result = rsaEncrypt(input_text)
+        else:
+            return jsonify({"error": "Unsupported encryption algorithm"}), 400
+    elif operation == "decryption":
+        if algorithm == "Base64":
+            result = base64Decrypt(input_text)
+        # elif algorithm == "Caesar Cipher":
+        #     result = caesarDecrypt(input_text)
+        # elif algorithm == "Monoalphabetic Substitution Cipher":
+        #     result = MonoalphabeticDecrypt(input_text)
+        # elif algorithm == "Vignere Cipher":
+        #     result = vignereDecrypt(input_text)
+        # elif algorithm == "DES":
+        #     result = desDecrypt(input_text)
+        # elif algorithm == "AES":
+        #     result = aesDecrypt(input_text, key)
+        # elif algorithm == "RSA":
+        #     result = rsaDecrypt(input_text)
+        else:
+            return jsonify({"error": "Unsupported decryption algorithm"}), 400
+    elif operation == "hashing":
+        if algorithm == "MD5":
+            result = hashlib.md5(input_text.encode()).hexdigest()
+        elif algorithm == "SHA-1":
+            result = hashlib.sha1(input_text.encode()).hexdigest()
+        elif algorithm == "SHA-256":
+            result = hashlib.sha256(input_text.encode()).hexdigest()
+        elif algorithm == "SHA-512":
+            result = hashlib.sha512(input_text.encode()).hexdigest()
+        else:
+            return jsonify({"error": "Unsupported hash algorithm"}), 400
+    
+    return jsonify({"result": result})
 
-def sha1Hash():
-    s = input("Enter string: ").encode()
-    result = hashlib.sha1(s).hexdigest()
-    return result
-
-def sha256hash():
-    s = input("Enter string: ").encode()
-    result = hashlib.sha256(s).hexdigest()
-    return result
-
-def sha512hash():
-    s = input("Enter string: ").encode()    
-    result = hashlib.sha512(s).hexdigest()
-    return result
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
