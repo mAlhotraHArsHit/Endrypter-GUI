@@ -54,7 +54,7 @@ export default function CryptographyTool() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const payload = {
       operation,
       algorithm,
@@ -64,7 +64,9 @@ export default function CryptographyTool() {
         direction,
         ...(operation === "decryption" && { decryptionMethod }),
       }),
-      ...(algorithm === "Vigenère Cipher" && { key }),
+      ...(algorithm === "DES" && {
+        ...(operation === "decryption" && {key}),
+      }),
       ...(algorithm === "RSA" && {
         ...(operation === "encryption" && rsaKeyOption === "existing" && {
           rsaPublicKeyFile: rsaPublicKeyFile ? rsaPublicKeyFile.name : null,
@@ -84,16 +86,16 @@ export default function CryptographyTool() {
         }),
       }),
     };
-  
-    // console.log("Payload:", payload);
-  
+
+    console.log("Payload:", payload);
+
     try {
       const response = await fetch("http://127.0.0.1:5000/crypto", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         setResult(data.result);
@@ -107,10 +109,10 @@ export default function CryptographyTool() {
       setResult("An error occurred");
       setStep(4);
     }
-  };  
-  
-  
-  
+  };
+
+
+
   const renderAlgorithmFields = () => {
     switch (algorithm) {
       case "Caesar Cipher":
@@ -291,20 +293,22 @@ export default function CryptographyTool() {
           );
         }
         break;
-      case "Vigenère Cipher":
-        return (
-          <div className="input-group">
-            <label htmlFor="key">Key:</label>
-            <input
-              type="text"
-              id="key"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              className="input-text"
-              required
-            />
-          </div>
-        );
+      case "DES":
+        if (operation === "decryption") {
+          return (
+            <div className="input-group">
+              <label htmlFor="key">Key:</label>
+              <input
+                type="text"
+                id="key"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                className="input-text"
+                required
+              />
+            </div>
+          );
+        }
       default:
         return null;
     }
@@ -348,7 +352,7 @@ export default function CryptographyTool() {
 
         {step === 2 && (
           <div className="step-container">
-            
+
             <h2 className="step-title"> Choose an algorithm for {operation === "encryption" ? "encryption" : operation === "decryption" ? "decryption" : "hashing"}:</h2>
             <div className="radio-group">
               {algorithms[operation].map((algo) => (

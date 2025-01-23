@@ -30,15 +30,9 @@ def base64Encrypt(s):
         cipher += '='
     return cipher
 
-def caesarEncrypt():
-    s = input("Enter the string: ")
-    print("(1) Right shift")
-    print("(2) Left shift")
-    direction = int(input())
-    print("Number of shifts: ")
-    shift = int(input())
+def caesarEncrypt(s, direction, shift):
     cipher = ''
-    if direction == 1:
+    if direction == 'left':
         for i in s:
             char = i
             if char.isalpha():
@@ -47,7 +41,7 @@ def caesarEncrypt():
                 else:
                     char = chr((ord(char) + shift - 97) % 26 + 97)
             cipher += char
-    elif direction == 2:
+    elif direction == 'right':
         for i in s:
             char = i
             if char.isalpha():
@@ -56,13 +50,10 @@ def caesarEncrypt():
                 else:
                     char = chr((ord(char) - shift - 97) % 26 + 97)
             cipher += char
-    else:
-        print("Not a valid option")
 
     return cipher
 
-def MonoalphabeticEncrypt():
-    s = input("Enter the string: ")
+def MonoalphabeticEncrypt(s):
     cipher = ''
     key = {
     'A': 'S', 'B': 'Y', 'C': 'E', 'D': 'C', 'E': 'T', 'F': 'B', 'G': 'F',
@@ -81,8 +72,7 @@ def MonoalphabeticEncrypt():
             cipher += char
     return cipher
 
-def vignereEncrypt():
-    s = input("Enter the string: ")
+def vignereEncrypt(s):
     key = "NEITB"
     cipher = ''
     for i in range(len(s)):
@@ -100,35 +90,24 @@ def vignereEncrypt():
             cipher += s[i]
     return cipher
 
-def desEncrypt():
-    s = input("Enter the string: ")
+def desEncrypt(s):
     key = get_random_bytes(8)
-    print("Generated key (hex):", key.hex())
-
     cipher = DES.new(key, DES.MODE_ECB)
     
     padded_s = pad(s.encode('utf-8'), DES.block_size)
     encryptedText = cipher.encrypt(padded_s)
-    cipher = encryptedText
+    cipher = encryptedText.hex()
     return cipher
 
-def aesEncrypt():
-    s = input("Enter the string to encrypt: ")
-
-    # Ask whether to generate a new key or use an existing one
-    choice = input("Do you want to generate a new key or use an existing one? (new/existing): ").strip().lower()
-
+def aesEncrypt(s, choice):
     if choice == "new":
         key = get_random_bytes(16)  # AES key size is 16 bytes (128 bits)
-        print("Generated key (hex):", key.hex())
 
         # Save the key for future decryption
         with open("aes_key.key", "wb") as f:
             f.write(key)
-        print("Key saved to 'aes_key.key'.")
     elif choice == "existing":
         if not os.path.exists("aes_key.key"):
-            print("Error: Key file 'aes_key.key' not found. Generate a new key first.")
             return "KEY FILE NOT FOUND"
 
         # Load the existing key
@@ -148,16 +127,9 @@ def aesEncrypt():
     with open("ciphertext_aes.txt", "wb") as f:
         f.write(cipher)
 
-    print("Encryption complete. Ciphertext saved to 'ciphertext_aes.txt'.")
     return "ENCRYPTION SUCCESSFUL"
 
-def rsaEncrypt(s):
-# RSA encryption
-    # s = input("Enter the string: ")
-
-    # Ask whether to generate a new key pair or use an existing one
-    choice = input("Do you want to generate a new key pair or use an existing one? (new/existing): ").strip().lower()
-
+def rsaEncrypt(s, choice):
     if choice == "new":
         # Generate RSA key pair
         key = RSA.generate(2048)
@@ -170,11 +142,9 @@ def rsaEncrypt(s):
         with open("public_rsa.pem", "wb") as f:
             f.write(public_key)
 
-        print("New RSA key pair generated and saved.")
     elif choice == "existing":
         # Check if key files exist
         if not os.path.exists("public_rsa.pem"):
-            print("Error: Public key file (public_rsa.pem) not found. Generate a new key pair first.")
             return "FILE NOT FOUND"
 
         # Load the public key from the existing file
@@ -182,9 +152,7 @@ def rsaEncrypt(s):
             public_key = f.read()
 
         key = RSA.import_key(public_key)
-        print("Existing public key loaded.")
     else:
-        print("Invalid choice. Please enter 'new' or 'existing'.")
         return "INVALID CHOICE"
 
     # Encrypt with public key
@@ -195,7 +163,6 @@ def rsaEncrypt(s):
     with open("ciphertext_rsa.txt", "wb") as f:
         f.write(encryptedText)
 
-    print("Encryption complete. Ciphertext saved to 'ciphertext_rsa.txt'.")
     return "FILE CREATED"
     
 def base64Decrypt(cipher):
@@ -209,20 +176,10 @@ def base64Decrypt(cipher):
             decipher += chr(int(byte,2))
     return decipher
 
-def caesarDecrypt():
-    cipher = input("Enter the string: ")
-    print("Choose how to decrypt - ")
-    print("(1) By shift")
-    print("(2) All 26 combination")
-    how = int(input())
-    if(how == 1):
-        print("Choose shift - ")
-        print("(1) Left Shift")
-        print("(2) Right Shift")
-        shift = int(input())
-        if(shift == 1):
-            print("Enter Left Shift Value- ")
-            shift_value = int(input())
+def caesarDecrypt(cipher, how, shift, shift_value):
+    if(how == 'shift'):
+        decipher = ""
+        if(shift == 'left'):
             for char in cipher:
                 if char.isalpha():
                     shifted = chr((ord(char) - shift_value))
@@ -235,9 +192,7 @@ def caesarDecrypt():
                     decipher += shifted
                 else:
                     decipher += char
-        elif(shift == 2):
-            shift_value = int(input("Enter the right shift value: "))
-            decipher = ""
+        elif(shift == 'right'):
             for char in cipher:
                 if char.isalpha():
                     shifted = chr((ord(char) + shift_value))
@@ -250,13 +205,12 @@ def caesarDecrypt():
                     decipher += shifted
                 else:
                     decipher += char
-        else:
-            print("Invalid shift direction.")
+
         return decipher
     else:
-        print("Here are all 26 combinations of Caesar cipher decryption:")
+        result = {}
+        deciphe = ""
         for shift_value in range(1, 27):
-            deciphe = ""
             for char in cipher:
                 if char.isalpha():
                     shifted = chr((ord(char) - shift_value))
@@ -269,7 +223,8 @@ def caesarDecrypt():
                     deciphe += shifted
                 else:
                     deciphe += char
-            print(f"Shift {shift_value}: {deciphe}")
+            result[shift_value] = deciphe
+        return result
 
 def MonoalphabeticDecrypt(cipher):
     key = {
@@ -305,35 +260,31 @@ def vignereDecrypt(cipher):
             decipher += newChar
         else:
             decipher += cipher[i]
+    return decipher
 
 def desDecrypt(cipher, key_hex):
     try:
         key = bytes.fromhex(key_hex) 
     except ValueError:
-        print("Invalid key format. Please provide a valid 16-character hex key.")
-        return None
+        return "Invalid key format. Please provide a valid 16-character hex key."
 
 
     if len(key) != 8:
-        print("Invalid key length. DES requires an 8-byte key.")
-        return None
+        return "Invalid key length. DES requires an 8-byte key."
 
     try:
-        
-        
         if not isinstance(cipher, bytes):
-            raise ValueError("Ciphertext must be in bytes format.")
+            raise ValueError("Ciphertext must be in hexadecimal format.")
     except (SyntaxError, ValueError):
-        print("Invalid ciphertext format. Please provide a valid bytes object (e.g., b'...').")
-        return None
+        return "Invalid ciphertext format. Please provide a valid hex-encoded ciphertext."
 
     try:
         des_cipher = DES.new(key, DES.MODE_ECB)
         decrypted_padded = des_cipher.decrypt(cipher)
         decipher = unpad(decrypted_padded, DES.block_size).decode('utf-8')
+        return decipher
     except (ValueError, KeyError) as e:
-        print("Error during decryption:", e)
-        return None
+        return f"Error during decryption: {str(e)}"
 
 def aesDecrypt():
     if not os.path.exists("aes_key.key"):
@@ -398,7 +349,6 @@ def rsaDecrypt():
 @app.route('/crypto', methods=['POST'])
 def crypto():
     data = request.get_json()
-    # print(data)
     operation = data.get("operation")
     algorithm = data.get("algorithm")
     input_text = data.get("input")
@@ -408,40 +358,48 @@ def crypto():
         if algorithm == "Base64":
             result = base64Encrypt(input_text)
         elif algorithm == "Caesar Cipher":
-            result = caesarEncrypt(input_text)
+            direction = data.get("direction")
+            shift = data.get("shift")
+            result = caesarEncrypt(input_text, direction, shift)
         elif algorithm == "Monoalphabetic Substitution Cipher":
             result = MonoalphabeticEncrypt(input_text)
-        elif algorithm == "Vignere Cipher":
+        elif algorithm == "Vigenère Cipher":
             result = vignereEncrypt(input_text)
         elif algorithm == "DES":
-            key = data.get("key")
             result = desEncrypt(input_text)
-        elif algorithm == "AES":
-            key = data.get("key")
-            result = aesEncrypt(input_text, key)
-        elif algorithm == "RSA":
-            key = data.get("key")
-            result = rsaEncrypt(input_text, key)
+        # elif algorithm == "AES":
+        #     key = data.get("key")
+        #     result = aesEncrypt(input_text, key)
+        # elif algorithm == "RSA":
+        #     key = data.get("key")
+        #     result = rsaEncrypt(input_text, key)
         else:
             return jsonify({"error": "Unsupported encryption algorithm"}), 400
     elif operation == "decryption":
         if algorithm == "Base64":
             result = base64Decrypt(input_text)
         elif algorithm == "Caesar Cipher":
-            result = caesarDecrypt(input_text)
+            how = data.get("decryptionMethod")
+            if how == 'shift':
+                shift = data.get("direction")
+                shift_value = data.get("shift")
+                result = caesarDecrypt(input_text, how, shift, shift_value)
+            else:
+                result = caesarDecrypt(input_text, how, '', 0)
         elif algorithm == "Monoalphabetic Substitution Cipher":
             result = MonoalphabeticDecrypt(input_text)
-        elif algorithm == "Vignere Cipher":
+        elif algorithm == "Vigenère Cipher":
             result = vignereDecrypt(input_text)
         elif algorithm == "DES":
+            byte_obj = bytes.fromhex(input_text)
             key = data.get("key")
-            result = desDecrypt(input_text)
-        elif algorithm == "AES":
-            key = data.get("key")
-            result = aesDecrypt(input_text, key)
-        elif algorithm == "RSA":
-            key = data.get("key")
-            result = rsaDecrypt(input_text, key)
+            result = desDecrypt(byte_obj, key)
+        # elif algorithm == "AES":
+        #     key = data.get("key")
+        #     result = aesDecrypt(input_text, key)
+        # elif algorithm == "RSA":
+        #     key = data.get("key")
+        #     result = rsaDecrypt(input_text, key)  
         else:
             return jsonify({"error": "Unsupported decryption algorithm"}), 400
     elif operation == "hashing":
