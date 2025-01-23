@@ -37,6 +37,7 @@ def caesarEncrypt():
     direction = int(input())
     print("Number of shifts: ")
     shift = int(input())
+    cipher = ''
     if direction == 1:
         for i in s:
             char = i
@@ -62,6 +63,7 @@ def caesarEncrypt():
 
 def MonoalphabeticEncrypt():
     s = input("Enter the string: ")
+    cipher = ''
     key = {
     'A': 'S', 'B': 'Y', 'C': 'E', 'D': 'C', 'E': 'T', 'F': 'B', 'G': 'F',
     'H': 'A', 'I': 'G', 'J': 'H', 'K': 'W', 'L': 'I', 'M': 'N', 'N': 'R',
@@ -82,6 +84,7 @@ def MonoalphabeticEncrypt():
 def vignereEncrypt():
     s = input("Enter the string: ")
     key = "NEITB"
+    cipher = ''
     for i in range(len(s)):
         if s[i].isalpha():
             
@@ -199,6 +202,7 @@ def base64Decrypt(cipher):
     cipher = cipher.rstrip('=')
     baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     binary = ''.join(format(baseChars.index(char),'06b') for char in cipher)
+    decipher = ''
     for i in range(0, len(binary), 8):
         byte = binary[i:i+8]
         if byte != '' :
@@ -278,6 +282,7 @@ def MonoalphabeticDecrypt(cipher):
     'q': 'z', 'r': 'l', 's': 'u', 't': 'm', 'u': 'p', 'v': 'v', 'w': 'q',
     'x': 'x', 'y': 'o', 'z': 'k'
     }
+    decipher = ''
     reverse = {v:k for k,v in key.items()}
     for char in cipher:
         if char in reverse:
@@ -287,6 +292,7 @@ def MonoalphabeticDecrypt(cipher):
 
 def vignereDecrypt(cipher):
     key = "NEITB"
+    decipher = ''
     for i in range(len(cipher)):
         if cipher[i].isalpha():
             shift = ord(key[i % len(key)]) - ord('A')
@@ -396,43 +402,46 @@ def crypto():
     operation = data.get("operation")
     algorithm = data.get("algorithm")
     input_text = data.get("input")
-    key = data.get("key")
     result = None
     
     if operation == "encryption":
         if algorithm == "Base64":
             result = base64Encrypt(input_text)
-            # result = "Not implemented"
-        # elif algorithm == "Caesar Cipher":
-        #     result = caesarEncrypt(input_text)
-        # elif algorithm == "Monoalphabetic Substitution Cipher":
-        #     result = MonoalphabeticEncrypt(input_text)
-        # elif algorithm == "Vignere Cipher":
-        #     result = vignereEncrypt(input_text)
-        # elif algorithm == "DES":
-        #     result = desEncrypt(input_text)
-        # elif algorithm == "AES":
-        #     result = aesEncrypt(input_text)
-        # elif algorithm == "RSA":
-        #     result = rsaEncrypt(input_text)
+        elif algorithm == "Caesar Cipher":
+            result = caesarEncrypt(input_text)
+        elif algorithm == "Monoalphabetic Substitution Cipher":
+            result = MonoalphabeticEncrypt(input_text)
+        elif algorithm == "Vignere Cipher":
+            result = vignereEncrypt(input_text)
+        elif algorithm == "DES":
+            key = data.get("key")
+            result = desEncrypt(input_text)
+        elif algorithm == "AES":
+            key = data.get("key")
+            result = aesEncrypt(input_text, key)
+        elif algorithm == "RSA":
+            key = data.get("key")
+            result = rsaEncrypt(input_text, key)
         else:
             return jsonify({"error": "Unsupported encryption algorithm"}), 400
     elif operation == "decryption":
         if algorithm == "Base64":
-            # result = base64Decrypt(input_text)
-            result = "Not implemented"
-        # elif algorithm == "Caesar Cipher":
-        #     result = caesarDecrypt(input_text)
-        # elif algorithm == "Monoalphabetic Substitution Cipher":
-        #     result = MonoalphabeticDecrypt(input_text)
-        # elif algorithm == "Vignere Cipher":
-        #     result = vignereDecrypt(input_text)
-        # elif algorithm == "DES":
-        #     result = desDecrypt(input_text)
-        # elif algorithm == "AES":
-        #     result = aesDecrypt(input_text, key)
-        # elif algorithm == "RSA":
-        #     result = rsaDecrypt(input_text)
+            result = base64Decrypt(input_text)
+        elif algorithm == "Caesar Cipher":
+            result = caesarDecrypt(input_text)
+        elif algorithm == "Monoalphabetic Substitution Cipher":
+            result = MonoalphabeticDecrypt(input_text)
+        elif algorithm == "Vignere Cipher":
+            result = vignereDecrypt(input_text)
+        elif algorithm == "DES":
+            key = data.get("key")
+            result = desDecrypt(input_text)
+        elif algorithm == "AES":
+            key = data.get("key")
+            result = aesDecrypt(input_text, key)
+        elif algorithm == "RSA":
+            key = data.get("key")
+            result = rsaDecrypt(input_text, key)
         else:
             return jsonify({"error": "Unsupported decryption algorithm"}), 400
     elif operation == "hashing":
