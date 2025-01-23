@@ -55,6 +55,7 @@ html, body {
     display: flex;
     align-items: center;
     gap: 10px;  /* Add gap to ensure space between the radio button and label */
+    accent-color: rgb(34, 34, 34);
   }
   
   .radio-input {
@@ -64,13 +65,15 @@ html, body {
   
   .next-button {
     margin-top: 40px;
-    background-color: #3182ce;
+    background-color: #292a2b;
     color: white;
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
     width: 100%;
+    font-size: 20px;
+    font-weight: 500;
   }
   
   .next-button:disabled {
@@ -79,7 +82,7 @@ html, body {
   }
   
   .next-button:hover:not(:disabled) {
-    background-color: #2b6cb0;
+    background-color: #5d5f61;
   }
   
   .form-container {

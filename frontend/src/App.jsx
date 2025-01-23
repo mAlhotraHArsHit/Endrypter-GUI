@@ -321,7 +321,9 @@ export default function CryptographyTool() {
 
         {step === 1 && (
           <div className="step-container">
-            <h2 className="step-title">Choose an operation:</h2>
+            <h2 className="step-title">
+              Choose an operation
+            </h2>
             <div className="radio-group">
               {operations.map((op) => (
                 <div key={op.id} className="radio-option">
@@ -346,7 +348,8 @@ export default function CryptographyTool() {
 
         {step === 2 && (
           <div className="step-container">
-            <h2 className="step-title">Choose an algorithm:</h2>
+            
+            <h2 className="step-title"> Choose an algorithm for {operation === "encryption" ? "encryption" : operation === "decryption" ? "decryption" : "hashing"}:</h2>
             <div className="radio-group">
               {algorithms[operation].map((algo) => (
                 <div key={algo} className="radio-option">
@@ -383,7 +386,7 @@ export default function CryptographyTool() {
               />
             </div>
             {renderAlgorithmFields()}
-            <button type="submit" className="submit-button">
+            <button type="submit" className="next-button">
               Submit
             </button>
           </form>
@@ -412,7 +415,7 @@ export default function CryptographyTool() {
                 setRsaKeyOption("new");
                 setAesKeyOption("new");
               }}
-              className="reset-button"
+              className="next-button"
             >
               Reset
             </button>
